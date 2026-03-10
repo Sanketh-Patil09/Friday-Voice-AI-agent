@@ -8,24 +8,41 @@
 </head>
 
 <body>
-<div class="container">
-  <div class="status-bar">
-    <div class="status">
-      Transport: <span id="connection-status">Disconnected</span>
-    </div>
-    <div class="controls">
-      <button id="connect-btn">Connect</button>
-      <button id="disconnect-btn" disabled>Disconnect</button>
-    </div>
-  </div>
+<div id="header">
+  <div class="header-left">Friday</div>
+</div>
 
-  <audio id="bot-audio" autoplay></audio>
+<div id="content">
+  <div class="friday-main">
+    <!-- Status Indicator with Glowing Dot -->
+    <div class="status-wrapper">
+      <span id="status-dot" class="status-dot offline"></span>
+      <span id="connection-status" class="status-text">Disconnected</span>
+    </div>
 
-  <div class="debug-panel">
-    <h3>Debug Info</h3>
-    <div id="debug-log"></div>
+    <!-- Seamless Visualizer with Ambient Glow -->
+    <div class="visualizer-wrapper">
+      <div id="ambient-glow" class="ambient-glow"></div>
+      <div class="aurora-waveform">
+        <canvas id="waveCanvas"></canvas>
+        <div id="voice-orb" class="voice-orb"></div>
+      </div>
+    </div>
+
+    <!-- Subtitles -->
+    <div id="subtitle-container">
+      <div id="subtitle-text"></div>
+    </div>
+
+    <!-- Dynamic Controls -->
+    <div class="controls-wrapper">
+      <button id="toggle-btn" class="action-btn btn-connect">Wake Friday</button>
+    </div>
   </div>
 </div>
+
+<div class="particle-layer" id="particleLayer"></div>
+<div class="background-layer"></div>
 
 <script type="module" src="/src/app.ts"></script>
 <link rel="stylesheet" href="/src/style.css">

@@ -3,11 +3,14 @@
 #
 # SPDX-License-Identifier: BSD 2-Clause License
 #
+
 import os
 import sys
-
 from dotenv import load_dotenv
 from loguru import logger
+
+from groq import Groq
+
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.frames.frames import LLMRunFrame
 from pipecat.pipeline.pipeline import Pipeline
@@ -19,7 +22,6 @@ from pipecat.processors.aggregators.llm_response_universal import (
     LLMUserAggregatorParams,
 )
 from pipecat.serializers.protobuf import ProtobufFrameSerializer
-from pipecat.services.google.gemini_live.llm import GeminiLiveLLMService
 from pipecat.transports.websocket.fastapi import (
     FastAPIWebsocketParams,
     FastAPIWebsocketTransport,
@@ -30,19 +32,19 @@ load_dotenv(override=True)
 logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
+SYSTEM_INSTRUCTION = """
+You are a friendly AI voice assistant.
 
-SYSTEM_INSTRUCTION = f"""
-"You are Gemini Chatbot, a friendly, helpful robot.
-
-Your goal is to demonstrate your capabilities in a succinct way.
-
-Your output will be converted to audio so don't include special characters in your answers.
-
-Respond to what the user said in a creative and helpful way. Keep your responses brief. One or two sentences at most.
+Your responses will be converted to speech.
+Keep responses short and helpful.
 """
+
+# Groq Client
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
 async def run_bot(websocket_client):
+
     ws_transport = FastAPIWebsocketTransport(
         websocket=websocket_client,
         params=FastAPIWebsocketParams(
@@ -53,20 +55,20 @@ async def run_bot(websocket_client):
         ),
     )
 
-    llm = GeminiLiveLLMService(
-        api_key=os.getenv("GOOGLE_API_KEY"),
-        voice_id="Puck",  # Aoede, Charon, Fenrir, Kore, Puck
-        system_instruction=SYSTEM_INSTRUCTION,
-    )
-
+    # LLM conversation context
     context = LLMContext(
         [
             {
+                "role": "system",
+                "content": SYSTEM_INSTRUCTION,
+            },
+            {
                 "role": "user",
-                "content": "Start by greeting the user warmly and introducing yourself.",
-            }
-        ],
+                "content": "Start by greeting the user warmly.",
+            },
+        ]
     )
+
     user_aggregator, assistant_aggregator = LLMContextAggregatorPair(
         context,
         user_params=LLMUserAggregatorParams(
@@ -74,11 +76,26 @@ async def run_bot(websocket_client):
         ),
     )
 
+    # Simple Groq LLM function
+    async def llm_processor(frame):
+
+        if frame.text:
+            completion = groq_client.chat.completions.create(
+                model="llama3-8b-8192",
+                messages=[
+                    {"role": "user", "content": frame.text}
+                ]
+            )
+
+            frame.text = completion.choices[0].message.content
+
+        return frame
+
     pipeline = Pipeline(
         [
             ws_transport.input(),
             user_aggregator,
-            llm,  # LLM
+            llm_processor,
             ws_transport.output(),
             assistant_aggregator,
         ]
@@ -95,16 +112,15 @@ async def run_bot(websocket_client):
     @task.rtvi.event_handler("on_client_ready")
     async def on_client_ready(rtvi):
         logger.info("Pipecat client ready.")
-        # Kick off the conversation.
         await task.queue_frames([LLMRunFrame()])
 
     @ws_transport.event_handler("on_client_connected")
     async def on_client_connected(transport, client):
-        logger.info("Pipecat Client connected")
+        logger.info("Client connected")
 
     @ws_transport.event_handler("on_client_disconnected")
     async def on_client_disconnected(transport, client):
-        logger.info("Pipecat Client disconnected")
+        logger.info("Client disconnected")
         await task.cancel()
 
     runner = PipelineRunner(handle_sigint=False)

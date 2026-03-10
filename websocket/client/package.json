@@ -1,16 +1,21 @@
 {
-  "name": "client",
+  "name": "friday-client",
   "version": "1.0.0",
+  "description": "Friday AI Agent - Premium Voice Assistant UI",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["ai", "voice-agent", "pipecat", "realtime", "websocket"],
+  "author": "Sanket Patel",
+  "license": "BSD-2-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sanketh-Patil09/friday-ai-agent.git"
+  },
   "devDependencies": {
     "@types/node": "^22.15.30",
     "@types/protobufjs": "^6.0.0",

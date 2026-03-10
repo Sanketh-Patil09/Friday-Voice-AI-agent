@@ -3,33 +3,51 @@
 #
 # SPDX-License-Identifier: BSD 2-Clause License
 #
+
 import asyncio
 import os
+import signal
 from contextlib import asynccontextmanager
 from typing import Any, Dict
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, WebSocket
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 # Load environment variables
 load_dotenv(override=True)
 
-from bot_fast_api import run_bot
+# Import ONLY the websocket server bot
 from bot_websocket_server import run_bot_websocket_server
+
+# Global reference to bot task for cleanup
+bot_task = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Handles FastAPI startup and shutdown."""
-    yield  # Run app
+    
+    global bot_task
+    # Start the Pipecat websocket voice bot
+    bot_task = asyncio.create_task(run_bot_websocket_server())
+
+    yield
+    
+    # Graceful shutdown
+    if bot_task and not bot_task.done():
+        bot_task.cancel()
+        try:
+            await bot_task
+        except asyncio.CancelledError:
+            pass
 
 
-# Initialize FastAPI app with lifespan manager
+# Initialize FastAPI app
 app = FastAPI(lifespan=lifespan)
 
-# Configure CORS to allow requests from any origin
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -39,40 +57,21 @@ app.add_middleware(
 )
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    print("WebSocket connection accepted")
-    try:
-        await run_bot(websocket)
-    except Exception as e:
-        print(f"Exception in run_bot: {e}")
-
-
 @app.post("/connect")
 async def bot_connect(request: Request) -> Dict[Any, Any]:
-    server_mode = os.getenv("WEBSOCKET_SERVER", "fast_api")
-    if server_mode == "websocket_server":
-        ws_url = "ws://localhost:8765"
-    else:
-        ws_url = "ws://localhost:7860/ws"
+    """
+    Client calls this endpoint to get websocket URL
+    """
+    ws_url = "ws://localhost:8765"
     return {"ws_url": ws_url}
 
 
 async def main():
-    server_mode = os.getenv("WEBSOCKET_SERVER", "fast_api")
-    tasks = []
-    try:
-        if server_mode == "websocket_server":
-            tasks.append(run_bot_websocket_server())
 
-        config = uvicorn.Config(app, host="0.0.0.0", port=7860)
-        server = uvicorn.Server(config)
-        tasks.append(server.serve())
+    config = uvicorn.Config(app, host="0.0.0.0", port=7860)
+    server = uvicorn.Server(config)
 
-        await asyncio.gather(*tasks)
-    except asyncio.CancelledError:
-        print("Tasks cancelled (probably due to shutdown).")
+    await server.serve()
 
 
 if __name__ == "__main__":
