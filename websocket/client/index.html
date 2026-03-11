@@ -4,48 +4,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Chatbot</title>
+  <title>Friday - AI Voice Agent</title>
 </head>
 
 <body>
-<div id="header">
-  <div class="header-left">Friday</div>
-</div>
+  <div class="background-layer"></div>
+  <div class="particle-layer" id="particleLayer"></div>
 
-<div id="content">
-  <div class="friday-main">
-    <!-- Status Indicator with Glowing Dot -->
-    <div class="status-wrapper">
-      <span id="status-dot" class="status-dot offline"></span>
-      <span id="connection-status" class="status-text">Disconnected</span>
+  <div class="main-container">
+    <!-- Logo -->
+    <div class="logo-section">
+      <svg class="logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- F letter -->
+        <rect x="40" y="40" width="40" height="120" fill="currentColor" rx="4"/>
+        <rect x="40" y="40" width="60" height="25" fill="currentColor" rx="4"/>
+        <rect x="40" y="95" width="50" height="20" fill="currentColor" rx="4"/>
+        
+        <!-- Waveform -->
+        <g stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Left wave -->
+          <path d="M 100 80 Q 105 75 110 80 Q 115 85 120 80"/>
+          <path d="M 100 95 Q 105 85 110 95 Q 115 105 120 95"/>
+          <path d="M 100 110 Q 105 105 110 110 Q 115 115 120 110"/>
+          
+          <!-- Center waves (taller) -->
+          <path d="M 125 70 Q 130 60 135 70 Q 140 80 145 70"/>
+          <path d="M 125 85 Q 130 70 135 85 Q 140 100 145 85"/>
+          <path d="M 125 100 Q 130 90 135 100 Q 140 110 145 100"/>
+          <path d="M 125 115 Q 130 105 135 115 Q 140 125 145 115"/>
+          
+          <!-- Right wave -->
+          <path d="M 150 80 Q 155 75 160 80 Q 165 85 170 80"/>
+          <path d="M 150 95 Q 155 85 160 95 Q 165 105 170 95"/>
+          <path d="M 150 110 Q 155 105 160 110 Q 165 115 170 110"/>
+        </g>
+      </svg>
+      <h1 class="title">Friday</h1>
+      <p class="subtitle">AI Voice Agent</p>
     </div>
 
-    <!-- Seamless Visualizer with Ambient Glow -->
-    <div class="visualizer-wrapper">
+    <!-- Waveform Visualizer -->
+    <div class="visualizer-section">
       <div id="ambient-glow" class="ambient-glow"></div>
-      <div class="aurora-waveform">
+      <div class="waveform-container">
         <canvas id="waveCanvas"></canvas>
         <div id="voice-orb" class="voice-orb"></div>
       </div>
     </div>
 
-    <!-- Subtitles -->
-    <div id="subtitle-container">
+    <!-- Transcript -->
+    <div id="subtitle-container" class="transcript-section">
       <div id="subtitle-text"></div>
     </div>
 
-    <!-- Dynamic Controls -->
-    <div class="controls-wrapper">
+    <!-- Status and Controls -->
+    <div class="footer-section">
+      <div class="status-indicator">
+        <span id="status-dot" class="status-dot offline"></span>
+        <span id="connection-status" class="status-text">Disconnected</span>
+      </div>
+      
       <button id="toggle-btn" class="action-btn btn-connect">Wake Friday</button>
     </div>
   </div>
-</div>
 
-<div class="particle-layer" id="particleLayer"></div>
-<div class="background-layer"></div>
-
-<script type="module" src="/src/app.ts"></script>
-<link rel="stylesheet" href="/src/style.css">
+  <script type="module" src="/src/app.ts"></script>
+  <link rel="stylesheet" href="/src/style.css">
 </body>
 
 </html>

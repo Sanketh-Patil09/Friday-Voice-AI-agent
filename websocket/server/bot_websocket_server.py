@@ -38,7 +38,9 @@ from database import UserRequest, Session
 
 
 SYSTEM_INSTRUCTION = """
-You are a friendly AI voice assistant.
+You are Friday, a friendly and helpful AI voice assistant.
+Your name is Friday.
+Always introduce yourself as Friday when greeting users.
 
 Keep responses short and helpful.
 
@@ -140,7 +142,7 @@ async def run_bot_websocket_server():
     context = LLMContext(
         [
             {"role": "system", "content": SYSTEM_INSTRUCTION},
-            {"role": "user", "content": "Start by greeting the user warmly."},
+            {"role": "user", "content": "Start by greeting the user warmly and introduce yourself as Friday."},
         ],
         tools,
     )

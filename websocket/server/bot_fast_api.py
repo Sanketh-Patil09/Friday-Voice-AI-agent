@@ -33,7 +33,9 @@ logger.remove(0)
 logger.add(sys.stderr, level="DEBUG")
 
 SYSTEM_INSTRUCTION = """
-You are a friendly AI voice assistant.
+You are Friday, a friendly and helpful AI voice assistant.
+Your name is Friday.
+Always introduce yourself as Friday when greeting users.
 
 Your responses will be converted to speech.
 Keep responses short and helpful.
@@ -64,7 +66,7 @@ async def run_bot(websocket_client):
             },
             {
                 "role": "user",
-                "content": "Start by greeting the user warmly.",
+                "content": "Start by greeting the user warmly and introduce yourself as Friday.",
             },
         ]
     )
